@@ -7,14 +7,32 @@
  * License: GNU General Public License version 2.0
  */
 
-#include <windows.h>
 #ifdef _WIN32
+#include <windows.h>
 #include <SetupAPI.h>
 #include <initguid.h>
 #include <Usbiodef.h>
+
+#else
+
+#include <sys/types.h>
+#include <sys/time.h>
+
+typedef unsigned int DWORD;
+
+DWORD GetTickCount()
+{
+  // could switch to mach_getabsolutetime() maybe
+  struct timeval tm={0,};
+  gettimeofday(&tm,NULL);
+  return (DWORD) (tm.tv_sec*1000 + tm.tv_usec/1000);
+}
+
 #endif
+
 #include <string>
 #include <cstring>
+#include <sstream>
 #define REAPERAPI_IMPLEMENT
 #include "reaKontrol.h"
 
@@ -23,45 +41,6 @@ using namespace std;
 const char KK_FX_PREFIX[] = "VSTi: Komplete Kontrol";
 const char KK_INSTANCE_PARAM_PREFIX[] = "NIKB";
 
-/*
-const char KKS_DEVICE_NAME[] = "Komplete Kontrol DAW - 1";
-const char KKA_DEVICE_NAME[] = "Komplete Kontrol A DAW";
-const char KKM_DEVICE_NAME[] = "Komplete Kontrol M DAW";
-
-int getKkMidiInput() {
-	int count = GetNumMIDIInputs();
-	for (int dev = 0; dev < count; ++dev) {
-		char name[30];
-		bool present = GetMIDIInputName(dev, name, sizeof(name));
-		if (!present) {
-			continue;
-		}
-		if (strcmp(name, KKS_DEVICE_NAME) == 0
-				|| strcmp(name, KKA_DEVICE_NAME) == 0
-				|| strcmp(name, KKM_DEVICE_NAME) == 0) {
-			return dev;
-		}
-	}
-	return -1;
-}
-
-int getKkMidiOutput() {
-	int count = GetNumMIDIOutputs();
-	for (int dev = 0; dev < count; ++dev) {
-		char name[30];
-		bool present = GetMIDIOutputName(dev, name, sizeof(name));
-		if (!present) {
-			continue;
-		}
-		if (strcmp(name, KKS_DEVICE_NAME) == 0
-				|| strcmp(name, KKA_DEVICE_NAME) == 0
-				|| strcmp(name, KKM_DEVICE_NAME) == 0) {
-			return dev;
-		}
-	}
-	return -1;
-}
-*/
 
 const string getKkInstanceName(MediaTrack* track, bool stripPrefix) {
 	int fxCount = TrackFX_GetCount(track);
@@ -110,7 +89,7 @@ void BaseSurface::Run() {
 	MIDI_eventlist* list = this->_midiIn->GetReadBuf();
 	MIDI_event_t* evt;
 	int i = 0;
-	while (evt = list->EnumItems(&i)) {
+	while ((evt = list->EnumItems(&i))) {
 		this->_onMidiEvent(evt);
 	}
 }

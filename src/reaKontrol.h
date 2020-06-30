@@ -9,7 +9,9 @@
 
 #pragma once
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 // ToDo: Cleanup REAPERAPI WANT list
 #define REAPERAPI_MINIMAL
@@ -68,6 +70,9 @@
 #define REAPERAPI_WANT_GetSet_LoopTimeRange
 #define REAPERAPI_WANT_Help_Set
 #define REAPERAPI_WANT_ShowMessageBox
+#define REAPERAPI_WANT_GetResourcePath
+#define REAPERAPI_WANT_file_exists
+#define REAPERAPI_WANT_NamedCommandLookup
 
 #include <reaper/reaper_plugin.h>
 #include <reaper/reaper_plugin_functions.h>
